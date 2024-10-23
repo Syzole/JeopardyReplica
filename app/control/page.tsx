@@ -26,16 +26,28 @@ export default function ControlPage() {
     const [ teamPointsInput, setTeamPointsInput ] = useState<Record<number, string>>({}); // Input for team points
     const [ selectedQuestion, setSelectedQuestion ] = useState<Question | null>(null);
     const [ selectedQuestions, setSelectedQuestions ] = useState<Record<string, boolean>>({});
+    const [ passphrase, setPassphrase ] = useState<string>(''); // State for storing the passphrase input
+    const [ isAuthenticated, setIsAuthenticated ] = useState<boolean>(false); // Whether the user is authenticated
+    const correctPassphrase = process.env.NEXT_PUBLIC_PASSPHRASE || 'password'; // Correct passphrase
+    const [ buzzOrder, setBuzzOrder ] = useState<string[]>([]);
+
+    console.log(correctPassphrase);
 
     // Load teams from the server on mount
     useEffect(() => {
         const loadTeams = async () => {
             const response = await fetch('/api/teams');
             const data = await response.json();
-            data.sort((a: Team, b: Team) => b.name.localeCompare(a.name)); // Sort teams by name
+            data.sort((a: Team, b: Team) => a.name.localeCompare(b.name)); // Sort teams by name
             setTeams(data);
         };
         loadTeams();
+
+        //check if passphrase is stored in local storage
+        const storedPassphrase = localStorage.getItem('passphrase');
+        if (storedPassphrase === correctPassphrase) {
+            setIsAuthenticated(true);
+        }
 
         // Listen for the 'selectedQuestions' event from the server
         socket.on('selectedQuestions', (data: Record<string, boolean>) => {
@@ -46,6 +58,10 @@ export default function ControlPage() {
             loadTeams();
         });
 
+        socket.on('buzz', (newBuzzOrder: string[]) => {
+            setBuzzOrder(newBuzzOrder);
+        });
+
         refreshSelectedQuestions(); // Fetch selected questions when the component mounts
 
         // Clean up the event listener on unmount
@@ -54,6 +70,21 @@ export default function ControlPage() {
             socket.off('teams');
         };
     }, []);
+
+    // Function to handle passphrase submission
+    const handlePassphraseSubmit = () => {
+        if (passphrase === correctPassphrase) {
+            setIsAuthenticated(true); // Allow access if passphrase is correct
+            localStorage.setItem('passphrase', passphrase); // Store the passphrase in local storage
+        } else {
+            alert("Incorrect passphrase, please try again.");
+        }
+    };
+
+    // Function to handle input change for passphrase
+    const handlePassphraseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPassphrase(e.target.value);
+    };
 
     // Function to add points to a team manually
     const updatePoints = async (teamIndex: number) => {
@@ -109,6 +140,7 @@ export default function ControlPage() {
 
     // Reset the game
     const resetGame = () => {
+        setSelectedQuestion(null); // Reset the selected question
         socket.emit('resetGame'); // Emit reset event
     };
 
@@ -119,7 +151,7 @@ export default function ControlPage() {
             const updatedTeam = { ...teams[ teamIndex ], points: points };
 
             //use alert to ask for confirmation
-            let sure = window.confirm("Are you sure you want to add " + points + " points to " + updatedTeam.name + " ?");
+            let sure = window.confirm("Are you sure you want to add " + selectedQuestion.points + " points to " + updatedTeam.name + " ?");
 
             if (!sure) {
                 return;
@@ -138,7 +170,7 @@ export default function ControlPage() {
 
             //use alert to ask for confirmation
 
-            let sure = window.confirm("Are you sure you want to deduct " + points + " points from " + updatedTeam.name + "?");
+            let sure = window.confirm("Are you sure you want to deduct " + selectedQuestion.points + " points from " + updatedTeam.name + "?");
 
             if (!sure) {
                 return;
@@ -149,14 +181,51 @@ export default function ControlPage() {
         }
     };
 
+    // Function to reset the buzzer
+    const resetBuzzer = () => {
+        let sure = window.confirm("Are you sure you want to reset the buzzer?");
+        if (!sure) {
+            return;
+        }
+        socket.emit('resetBuzzer'); // Emit event to reset the buzzer
+    };
+
+    //Function to remove the person on the top of the buzzer list
+    const removeTopBuzzer = () => {
+        socket.emit('removeTopBuzzer'); // Emit event to remove the top buzzer
+    };
+
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
+                <h1 className="text-4xl font-bold mb-8 text-blue-600">Jeopardy Game Control</h1>
+                <Input
+                    value={ passphrase }
+                    onChange={ handlePassphraseChange }
+                    placeholder="Enter passphrase"
+                    className="mb-4"
+                />
+                <Button onClick={ handlePassphraseSubmit } className="bg-blue-600 text-white">
+                    Submit
+                </Button>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
             <h1 className="text-4xl font-bold mb-8 text-blue-600">Jeopardy Game Control</h1>
 
             {/* Link to manage teams */ }
-            <Link href="/teams">
-                <Button className="mb-4 bg-green-600">Manage Teams</Button>
-            </Link>
+            <div className="flex space-x-4">
+                <Link href="/teams">
+                    <Button className="bg-green-600">Manage Players</Button>
+                </Link>
+                <Button onClick={ resetBuzzer } className="bg-yellow-600">
+                    Reset Buzzer
+                </Button>
+                <Button onClick={ removeTopBuzzer } className="bg-blue-600"> Next Buzzer</Button>
+            </div>
 
             {/* Team Management Section */ }
             <div className="mb-8 w-full max-w-lg">
@@ -236,45 +305,50 @@ export default function ControlPage() {
 
             {/* Display selected question and answer */ }
             { selectedQuestion && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-10 flex-col">
-                    <div className='items-start'>
-                        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mb-2">
-                            <p className="text-lg font-semibold text-black">{ selectedQuestion.question }</p>
-                            <p className="mt-4 text-md text-gray-600">Answer: { selectedQuestion.answer }</p>
-                            <p className="mt-4 text-md text-gray-600">Points: { selectedQuestion.points }</p>
-                            <div className="mt-4 flex space-x-4">
-                                <Button onClick={ revealAnswer } className="bg-blue-600 text-white px-4 py-2 rounded-lg">
-                                    Reveal Answer
-                                </Button>
-                                <Button onClick={ resetGame } className="bg-red-600 text-white px-4 py-2 rounded-lg">
-                                    Show Game
-                                </Button>
-                                <Button onClick={ () => setSelectedQuestion(null) } className="bg-gray-600 text-white px-4 py-2 rounded-lg">
-                                    Close
-                                </Button>
-                            </div>
-                        </div>
-                        <div className=' bg-white rounded-lg justify-center items-center flex flex-col'>
-                            <h2 className="text-2xl font-semibold mb-4 text-black">Select Team For Points:</h2>
-                            { teams.map((team, index) => (
-                                <div className='flex flex-col'>
-                                    <Button
-                                        key={ index }
-                                        onClick={ () => handleCorrectAnswer(index) }
-                                        className="bg-green-600 text-white px-4 py-2 rounded-lg mr-2 mb-2"
-                                    >
-                                        { team.name }
+                <div className='fixed inset-0 bg-gray-800 bg-opacity-75 z-10 justify-center items-center flex'>
+                    <div className="  flex justify-center items-center flex-col">
+                        <div className='items-start'>
+                            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mb-2">
+                                <p className="text-lg font-semibold text-black">{ selectedQuestion.question }</p>
+                                <p className="mt-4 text-md text-gray-600">Answer: { selectedQuestion.answer }</p>
+                                <p className="mt-4 text-md text-gray-600">Points: { selectedQuestion.points }</p>
+                                <div className="mt-4 flex space-x-4">
+                                    <Button onClick={ revealAnswer } className="bg-blue-600 text-white px-4 py-2 rounded-lg">
+                                        Reveal Answer
                                     </Button>
-                                    <Button
-                                        key={ index }
-                                        onClick={ () => handleIncorrectAnswer(index) }
-                                        className="bg-red-600 text-white px-4 py-2 rounded-lg mr-2 mb-2"
-                                    >
-                                        { team.name }
+                                    <Button onClick={ removeTopBuzzer } className="bg-green-600 text-white"> Next Buzzer</Button>
+                                    <Button onClick={ resetGame } className="bg-gray-600 text-white px-4 py-2 rounded-lg">
+                                        Close
                                     </Button>
                                 </div>
-                            )) }
+                            </div>
+                            <div className=' bg-white rounded-lg justify-center items-center flex flex-col'>
+                                <h2 className="text-2xl font-semibold mb-4 text-black">Select Team For Points:</h2>
+                                <div className='flex flex-row'>
+                                    { teams.map((team, index) => (
+                                        <div className='flex flex-col'>
+                                            <Button
+                                                key={ index }
+                                                onClick={ () => handleCorrectAnswer(index) }
+                                                className="bg-green-600 text-white px-4 py-2 rounded-lg mr-2 mb-2"
+                                            >
+                                                { team.name }
+                                            </Button>
+                                            <Button
+                                                key={ index }
+                                                onClick={ () => handleIncorrectAnswer(index) }
+                                                className="bg-red-600 text-white px-4 py-2 rounded-lg mr-2 mb-2"
+                                            >
+                                                { team.name }
+                                            </Button>
+                                        </div>
+                                    )) }
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                    <div className='text-xl'>
+                        Test
                     </div>
                 </div>
             ) }

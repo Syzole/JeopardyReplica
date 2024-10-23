@@ -108,6 +108,9 @@ export default function Home() {
         <Link href="/control">
           <Button color="secondary">Control Page</Button>
         </Link>
+        <Link href="/buzzerPage">
+          <Button color="success" className='text-white'>Buzzer Page</Button>
+        </Link>
       </div>
     </div>
   );

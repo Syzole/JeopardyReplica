@@ -22,6 +22,10 @@ let selectedQuestions: Record<string, boolean> = {};
 // Path to the teams.json file
 const teamsFilePath = path.join(__dirname, "data", "teams.json");
 
+// Buzzer-specific state
+let buzzOrder: string[] = []; // Store the order of buzzes
+let activeNames = new Set<string>(); // Store active names to prevent duplicates
+
 app.prepare().then(() => {
 	const server = createServer((req, res) => {
 		handle(req, res);
@@ -37,6 +41,53 @@ app.prepare().then(() => {
 
 	io.on("connection", (socket) => {
 		console.log("New client connected:", socket.id);
+
+		/** Buzzer functionality **/
+
+		socket.on("GetTeams", () => {
+			socket.emit("teams");
+		});
+
+		// Check for unique name before allowing a user to buzz
+		socket.on("checkName", (name: string, callback: (isNameTaken: boolean) => void) => {
+			if (activeNames.has(name)) {
+				callback(true); // Name is taken
+			} else {
+				activeNames.add(name); // Add the name to the active set
+				callback(false); // Name is available
+			}
+		});
+
+		socket.on("removeName", (name: string) => {
+			activeNames.delete(name);
+		});
+
+		// Handle buzzing
+		socket.on("buzz", (name: string) => {
+			if (!buzzOrder.includes(name)) {
+				buzzOrder.push(name); // Add the name to the buzz order
+				io.emit("buzz", buzzOrder); // Notify all clients of the updated buzz order
+			}
+		});
+
+		// Reset the buzzer (called by host or when resetting the game)
+		socket.on("resetBuzzer", () => {
+			buzzOrder = []; // Clear the buzz order
+			io.emit("buzz", buzzOrder); // Notify all clients to clear their orders
+			io.emit("resetBuzzer"); // Optionally notify clients of buzzer reset
+		});
+
+		socket.on("removeTopBuzzer", () => {
+			buzzOrder.shift();
+			io.emit("buzz", buzzOrder); // Notify all clients of the updated buzz order
+		});
+		// Handle disconnection
+		socket.on("disconnect", () => {
+			console.log("Client disconnected:", socket.id);
+			// Optional: Remove the name from active names on disconnect
+		});
+
+		/** Existing Quiz Game Functionality **/
 
 		// Listen for the host to set a new question
 		socket.on("newQuestion", (question: Question) => {
@@ -67,16 +118,23 @@ app.prepare().then(() => {
 		// Reset the game (clear the current question and state)
 		socket.on("resetGame", () => {
 			console.log("Resetting game...");
-			currentQuestion = null;
+			currentQuestion = null; // Clear the current question
+			buzzOrder = []; // Reset buzz order when the game is reset
 
+			// Emit a reset event before clearing the state
+			io.emit("resetBuzzer"); // Notify clients of buzzer reset
 			io.emit("currentQuestion", null); // Clear the question on all clients
 			io.emit("selectedQuestions", selectedQuestions); // Notify clients that questions have been reset
+			io.emit("buzz", buzzOrder, false); // Reset buzz order on all clients
 			io.emit("resetGame"); // Optionally notify clients of game reset
 		});
 
 		socket.on("TrueRefresh", () => {
 			console.log("TrueRefresh");
+			buzzOrder = []; // Reset buzz order when the game is reset
+			activeNames.clear(); // Clear all active names
 			selectedQuestions = {};
+			io.emit("buzz", buzzOrder); // Reset buzz order on all clients
 			io.emit("selectedQuestions", selectedQuestions);
 		});
 
@@ -99,11 +157,6 @@ app.prepare().then(() => {
 
 		socket.on("teams", () => {
 			io.emit("teams"); // Send the updated teams to all clients
-		});
-
-		// Handle disconnection
-		socket.on("disconnect", () => {
-			console.log("Client disconnected:", socket.id);
 		});
 	});
 

@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from 'react';
+
+import { useEffect, useState, useRef } from 'react';
 import io from 'socket.io-client';
 import questionsData from '@/data/qna.json'; // Import the JSON data for questions
 import { Question } from '../control/page';
@@ -10,6 +11,7 @@ const socket = io('http://10.0.0.194:3000'); // Adjust to your server's URL
 interface Team {
     name: string;
     points: number;
+    buzzOrder: number | null; // Track the buzz order
 }
 
 export default function DisplayPage() {
@@ -17,8 +19,18 @@ export default function DisplayPage() {
     const [ revealedAnswer, setRevealedAnswer ] = useState<string | null>(null);
     const [ selectedQuestions, setSelectedQuestions ] = useState<Record<string, boolean>>({});
     const [ teams, setTeams ] = useState<Team[]>([]);
+    const [ buzzOrder, setBuzzOrder ] = useState<string[]>([]); // New state for buzz order
+
+    const currentQuestionRef = useRef(currentQuestion); // Ref to track the current question
 
     useEffect(() => {
+        currentQuestionRef.current = currentQuestion; // Always keep the ref updated with the latest value
+    }, [ currentQuestion ]);
+
+    useEffect(() => {
+        const buzzerSound = new Audio('/buzzer.mp3'); // Load the buzzer sound
+        buzzerSound.volume = 0.5; // Set the volume to 50%
+
         // Fetch teams from the server on mount
         const loadTeams = async () => {
             const response = await fetch('/api/teams');
@@ -47,10 +59,28 @@ export default function DisplayPage() {
         socket.on('resetGame', () => {
             setCurrentQuestion(null);
             setRevealedAnswer(null);
+            setBuzzOrder([]); // Reset buzz order
+        });
+
+        // Handle buzz event
+        socket.on('buzz', (buzzedTeams: string[], shouldBuzz: boolean = true) => {
+            // Only play the sound if there is a current question
+            if (shouldBuzz && currentQuestionRef.current) {
+                buzzerSound.play().catch((error) => {
+                    console.error('Error playing buzzer sound:', error);
+                }); // Play the buzzer sound
+                setBuzzOrder(buzzedTeams); // Update the buzz order
+            } else {
+                console.warn('Buzz received but no current question is set. Ignoring...');
+            }
+        });
+
+
+        socket.on("resetBuzzer", () => {
+            setBuzzOrder([]); // Clear the buzz order
         });
 
         socket.on("teams", () => {
-            console.log("Refreshing teams...");
             loadTeams();
         });
 
@@ -61,6 +91,7 @@ export default function DisplayPage() {
             socket.off('revealAnswer');
             socket.off('resetGame');
             socket.off('selectedQuestions');
+            socket.off('buzz');
             socket.off('teams');
         };
     }, []);
@@ -70,7 +101,6 @@ export default function DisplayPage() {
     };
 
     const findQuestionCategory = (question: Question) => {
-
         return questionsData.categories.find((category) =>
             category.questions.some((q) => q.question === question.question)
         )?.name || 'Unknown Category';
@@ -81,12 +111,31 @@ export default function DisplayPage() {
             <h1 className="text-8xl font-bold mb-10 text-blue-600">Jeopardy</h1>
 
             { currentQuestion ? (
-                <div className="bg-gray-800 p-20 rounded-lg shadow-lg w-full max-w-4xl mb-12 items-center flex flex-col">
-                    <p className="text-6xl text-sky-400 mb-20">{ `${findQuestionCategory(currentQuestion)}` }</p>
-                    <p className="text-6xl font-semibold">{ currentQuestion.question }</p>
-                    <p className="mt-8 text-6xl">Points: { currentQuestion.points }</p>
-                    { revealedAnswer && (
-                        <p className="mt-8 text-6xl text-green-400">Answer: { revealedAnswer }</p>
+                <div className='flex'>
+                    <div className="bg-gray-800 p-20 rounded-lg shadow-lg w-full max-w-4xl mb-12 items-center flex flex-col mr-20">
+                        <p className="text-6xl text-sky-400 mb-20">{ `${findQuestionCategory(currentQuestion)}` }</p>
+                        <p className="text-6xl font-semibold">{ currentQuestion.question }</p>
+                        <p className="mt-8 text-6xl">Points: { currentQuestion.points }</p>
+                        { revealedAnswer && (
+                            <p className="mt-8 text-6xl text-green-400">Answer: { revealedAnswer }</p>
+                        ) }
+                    </div>
+                    {/* Buzz Order Section */ }
+                    { buzzOrder.length > 0 && (
+                        <div className="mt-8 ">
+                            <h2 className="text-6xl font-bold text-center mb-4 text-yellow-400">Buzz Order</h2>
+                            <ul className="flex flex-col gap-2">
+                                { buzzOrder.map((team, index) => (
+                                    <li
+                                        key={ index }
+                                        className="flex justify-between items-center bg-gray-600 p-3 rounded-lg"
+                                    >
+                                        <span className="text-6xl font-semibold mr-2">{ team }</span>
+                                        <span className="text-6xl font-bold text-yellow-400">Buzzed #{ index + 1 }</span>
+                                    </li>
+                                )) }
+                            </ul>
+                        </div>
                     ) }
                 </div>
             ) : (
@@ -100,9 +149,7 @@ export default function DisplayPage() {
                                 className="flex flex-col items-center bg-slate-800 rounded-lg shadow-lg m-4"
                                 style={ { width: '240px', maxHeight: '80vh' } } // Shrinking the size slightly
                             >
-                                <h3 className="text-4xl font-semibold mb-4 text-center text-blue-400 overflow-hidden text-ellipsis whitespace-nowrap" style={ { maxWidth: '100%' } }>
-                                    { category.name }
-                                </h3>
+                                <h3 className="text-4xl font-semibold mb-4 text-center text-blue-400 overflow-hidden text-ellipsis whitespace-nowrap" style={ { maxWidth: '100%' } }>{ category.name }</h3>
                                 <div className="flex flex-col w-full">
                                     { category.questions.map((question) => (
                                         <button
@@ -120,7 +167,7 @@ export default function DisplayPage() {
                         )) }
                     </div>
 
-                    {/* Teams Section */ }
+                    {/* Teams Section with Buzz Order */ }
                     <div className="flex-shrink-0 w-full max-w-sm bg-slate-800 p-6 rounded-lg shadow-lg mt-4">
                         <h2 className="text-4xl font-bold text-center mb-6 text-blue-400">Team Points</h2>
                         <div className="flex flex-col gap-4">
