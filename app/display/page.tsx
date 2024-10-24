@@ -69,10 +69,10 @@ export default function DisplayPage() {
                 buzzerSound.play().catch((error) => {
                     console.error('Error playing buzzer sound:', error);
                 }); // Play the buzzer sound
-                setBuzzOrder(buzzedTeams); // Update the buzz order
             } else {
                 console.warn('Buzz received but no current question is set. Ignoring...');
             }
+            setBuzzOrder(buzzedTeams); // Update the buzz order
         });
 
 
@@ -111,14 +111,30 @@ export default function DisplayPage() {
             <h1 className="text-8xl font-bold mb-10 text-blue-600">Jeopardy</h1>
 
             { currentQuestion ? (
-                <div className='flex'>
-                    <div className="bg-gray-800 p-20 rounded-lg shadow-lg w-full max-w-4xl mb-12 items-center flex flex-col mr-20">
+                <div className='flex flex-row justify-between gap-x-8 items-start'>
+                    <div className="bg-gray-800 p-20 rounded-lg shadow-lg w-full max-w-4xl mb-12 items-center flex flex-col">
                         <p className="text-6xl text-sky-400 mb-20">{ `${findQuestionCategory(currentQuestion)}` }</p>
                         <p className="text-6xl font-semibold">{ currentQuestion.question }</p>
                         <p className="mt-8 text-6xl">Points: { currentQuestion.points }</p>
                         { revealedAnswer && (
                             <p className="mt-8 text-6xl text-green-400">Answer: { revealedAnswer }</p>
                         ) }
+                    </div>
+                    {/* Teams Section with Buzz Order */ }
+                    <div className="flex-shrink-0 w-full max-w-sm bg-slate-800 p-6 rounded-lg shadow-lg mt-4">
+                        <h2 className="text-4xl font-bold text-center mb-6 text-blue-400">Team Points</h2>
+                        <div className="flex flex-col gap-4">
+                            { teams.length > 0 ? (
+                                teams.map((team, index) => (
+                                    <div key={ index } className="flex justify-between items-center bg-gray-700 p-3 rounded-lg">
+                                        <span className="text-xl font-semibold">{ team.name }</span>
+                                        <span className="text-xl font-bold text-green-400">{ team.points } pts</span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-400">No teams available</p>
+                            ) }
+                        </div>
                     </div>
                     {/* Buzz Order Section */ }
                     { buzzOrder.length > 0 && (

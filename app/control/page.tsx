@@ -140,7 +140,7 @@ export default function ControlPage() {
 
     // Reset the game
     const resetGame = () => {
-        setSelectedQuestion(null); // Reset the selected question
+        //setSelectedQuestion(null); // Reset the selected question
         socket.emit('resetGame'); // Emit reset event
     };
 
@@ -151,11 +151,11 @@ export default function ControlPage() {
             const updatedTeam = { ...teams[ teamIndex ], points: points };
 
             //use alert to ask for confirmation
-            let sure = window.confirm("Are you sure you want to add " + selectedQuestion.points + " points to " + updatedTeam.name + " ?");
+            // let sure = window.confirm("Are you sure you want to add " + selectedQuestion.points + " points to " + updatedTeam.name + " ?");
 
-            if (!sure) {
-                return;
-            }
+            // if (!sure) {
+            //     return;
+            // }
 
             socket.emit('addPoints', updatedTeam.name, selectedQuestion.points); // Emit event to add points
             setTeams((prev) => prev.map((team, idx) => (idx === teamIndex ? updatedTeam : team))); // Update local state
@@ -164,17 +164,17 @@ export default function ControlPage() {
 
     // Deduct points from a team for answering the question incorrectly
     const handleIncorrectAnswer = (teamIndex: number) => {
-        if (selectedQuestion) {
+        if (selectedQuestion && teams[ teamIndex ]) {
             const points = Math.max(0, teams[ teamIndex ].points - selectedQuestion.points); // Prevent negative points
             const updatedTeam = { ...teams[ teamIndex ], points: points };
 
             //use alert to ask for confirmation
 
-            let sure = window.confirm("Are you sure you want to deduct " + selectedQuestion.points + " points from " + updatedTeam.name + "?");
+            // let sure = window.confirm("Are you sure you want to deduct " + selectedQuestion.points + " points from " + updatedTeam.name + "?");
 
-            if (!sure) {
-                return;
-            }
+            // if (!sure) {
+            //     return;
+            // }
 
             socket.emit('addPoints', updatedTeam.name, -selectedQuestion.points); // Emit event to deduct points
             setTeams((prev) => prev.map((team, idx) => (idx === teamIndex ? updatedTeam : team))); // Update local state
@@ -306,7 +306,7 @@ export default function ControlPage() {
             {/* Display selected question and answer */ }
             { selectedQuestion && (
                 <div className='fixed inset-0 bg-gray-800 bg-opacity-75 z-10 justify-center items-center flex'>
-                    <div className="  flex justify-center items-center flex-col">
+                    <div className="  flex justify-center items-center flex-col mr-2">
                         <div className='items-start'>
                             <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mb-2">
                                 <p className="text-lg font-semibold text-black">{ selectedQuestion.question }</p>
@@ -316,8 +316,15 @@ export default function ControlPage() {
                                     <Button onClick={ revealAnswer } className="bg-blue-600 text-white px-4 py-2 rounded-lg">
                                         Reveal Answer
                                     </Button>
-                                    <Button onClick={ removeTopBuzzer } className="bg-green-600 text-white"> Next Buzzer</Button>
-                                    <Button onClick={ resetGame } className="bg-gray-600 text-white px-4 py-2 rounded-lg">
+                                    <Button onClick={ () => {
+                                        let teamIndex = teams.findIndex((team) => team.name === buzzOrder[ 0 ]);
+                                        handleIncorrectAnswer(teamIndex);
+                                        socket.emit('removeTopBuzzer');
+                                    } } className="bg-green-600 text-white"> Next Buzzer</Button>
+                                    <Button onClick={ resetGame } className="bg-red-600 text-white px-4 py-2 rounded-lg mr-32">
+                                        Show Game
+                                    </Button>
+                                    <Button onClick={ () => setSelectedQuestion(null) } className="bg-gray-600 text-white px-4 py-2 rounded-lg">
                                         Close
                                     </Button>
                                 </div>
@@ -348,7 +355,22 @@ export default function ControlPage() {
                         </div>
                     </div>
                     <div className='text-xl'>
-                        Test
+                        { buzzOrder.length > 0 && (
+                            <div className="mt-8 ">
+                                <h2 className="text-2xl font-bold text-center mb-4 text-yellow-400">Buzz Order</h2>
+                                <ul className="flex flex-col gap-2">
+                                    { buzzOrder.map((team, index) => (
+                                        <li
+                                            key={ index }
+                                            className="flex justify-between items-center bg-gray-600 p-3 rounded-lg"
+                                        >
+                                            <span className="font-semibold mr-2">{ team }</span>
+                                            <span className="font-bold text-yellow-400">Buzzed #{ index + 1 }</span>
+                                        </li>
+                                    )) }
+                                </ul>
+                            </div>
+                        ) }
                     </div>
                 </div>
             ) }

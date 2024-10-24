@@ -79,7 +79,7 @@ app.prepare().then(() => {
 
 		socket.on("removeTopBuzzer", () => {
 			buzzOrder.shift();
-			io.emit("buzz", buzzOrder); // Notify all clients of the updated buzz order
+			io.emit("buzz", buzzOrder, false); // Notify all clients of the updated buzz order
 		});
 		// Handle disconnection
 		socket.on("disconnect", () => {
@@ -94,6 +94,10 @@ app.prepare().then(() => {
 			currentQuestion = question;
 
 			console.log("New question set:", currentQuestion);
+
+			buzzOrder = []; // Clear the buzz order
+			io.emit("buzz", buzzOrder, false); // Notify all clients to clear their orders
+			io.emit("resetBuzzer"); // Optionally notify clients of buzzer reset
 
 			// Send the question and updated selected questions to all clients
 			io.emit("currentQuestion", currentQuestion);
