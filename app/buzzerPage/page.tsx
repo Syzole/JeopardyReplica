@@ -41,6 +41,10 @@ const BuzzerPage: React.FC = () => {
             loadTeams();
         });
 
+        socket.on("disableBuzzers", () => {
+            setHasBuzzed(true);
+        });
+
         // Clean up the socket listener when the component unmounts
         return () => {
             socket.off('buzz');

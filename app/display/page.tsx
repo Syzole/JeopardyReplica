@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import io from 'socket.io-client';
 import questionsData from '@/data/qna.json'; // Import the JSON data for questions
 import { Question } from '../control/page';
+import ListOfFortune from '../components/wheelOfLuck';
 
 const socket = io('http://10.0.0.194:3000'); // Adjust to your server's URL
 
@@ -20,6 +21,7 @@ export default function DisplayPage() {
     const [ selectedQuestions, setSelectedQuestions ] = useState<Record<string, boolean>>({});
     const [ teams, setTeams ] = useState<Team[]>([]);
     const [ buzzOrder, setBuzzOrder ] = useState<string[]>([]); // New state for buzz order
+    const [ wheelType, setWheelType ] = useState<'good' | 'bad' | null>(null);
 
     const currentQuestionRef = useRef(currentQuestion); // Ref to track the current question
 
@@ -84,6 +86,11 @@ export default function DisplayPage() {
             loadTeams();
         });
 
+        socket.on('wheel', (type: 'good' | 'bad' | null) => {
+            setWheelType(type);
+        });
+
+
         socket.emit('refreshSelectedQuestions');
 
         return () => {
@@ -93,6 +100,7 @@ export default function DisplayPage() {
             socket.off('selectedQuestions');
             socket.off('buzz');
             socket.off('teams');
+            socket.off('wheel');
         };
     }, []);
 
@@ -198,6 +206,14 @@ export default function DisplayPage() {
                                 <p className="text-gray-400">No teams available</p>
                             ) }
                         </div>
+                    </div>
+                </div>
+            ) }
+            { wheelType && (
+                <div className="mt-8 z-50 fixed inset-0 flex items-center justify-center bg-black bg-opacity-75">
+                    <div className="bg-gray-800 p-10 rounded-lg shadow-lg">
+                        <h2 className="text-6xl font-bold text-center mb-4 text-yellow-400">Wheel of Fortune</h2>
+                        <ListOfFortune type={ wheelType } />
                     </div>
                 </div>
             ) }

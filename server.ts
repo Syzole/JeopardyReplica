@@ -114,6 +114,7 @@ app.prepare().then(() => {
 			if (currentQuestion) {
 				console.log("Answer:", currentQuestion.answer);
 				selectedQuestions[`${currentQuestion.question}-${currentQuestion.points}`] = true; // Mark the question as selected
+				io.emit("disableBuzzers"); // Disable buzzers on all clients
 				io.emit("selectedQuestions", selectedQuestions); // Notify clients that questions have been reset
 				io.emit("revealAnswer", currentQuestion.answer, selectedQuestions); // Send the answer to all clients
 			}
@@ -161,6 +162,14 @@ app.prepare().then(() => {
 
 		socket.on("teams", () => {
 			io.emit("teams"); // Send the updated teams to all clients
+		});
+
+		socket.on("wheel", (type: "good" | "bad" | null) => {
+			io.emit("wheel", type);
+		});
+
+		socket.on("spinWheel", () => {
+			io.emit("spinWheel");
 		});
 	});
 

@@ -195,6 +195,14 @@ export default function ControlPage() {
         socket.emit('removeTopBuzzer'); // Emit event to remove the top buzzer
     };
 
+    const sendWheelType = (wheelType: string | null) => {
+        socket.emit('wheel', wheelType);
+    }
+
+    const spinWheel = () => {
+        socket.emit('spinWheel');
+    };
+
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
@@ -217,14 +225,22 @@ export default function ControlPage() {
             <h1 className="text-4xl font-bold mb-8 text-blue-600">Jeopardy Game Control</h1>
 
             {/* Link to manage teams */ }
-            <div className="flex space-x-4">
-                <Link href="/teams">
-                    <Button className="bg-green-600">Manage Players</Button>
-                </Link>
-                <Button onClick={ resetBuzzer } className="bg-yellow-600">
-                    Reset Buzzer
-                </Button>
-                <Button onClick={ removeTopBuzzer } className="bg-blue-600"> Next Buzzer</Button>
+            <div className='space-y-4'>
+                <div className="flex space-x-4">
+                    <Link href="/teams">
+                        <Button className="bg-green-600">Manage Players</Button>
+                    </Link>
+                    <Button onClick={ resetBuzzer } className="bg-yellow-600">
+                        Reset Buzzer
+                    </Button>
+                    <Button onClick={ removeTopBuzzer } className="bg-blue-600"> Next Buzzer</Button>
+                </div>
+                <div className='flex space-x-4'>
+                    <Button onClick={ () => sendWheelType('good') } className="bg-green-600">Good Wheel</Button>
+                    <Button onClick={ () => sendWheelType('bad') } className="bg-red-600">Bad Wheel</Button>
+                    <Button onClick={ () => sendWheelType(null) } className="bg-blue-600">Reset Wheel</Button>
+                    <Button onClick={ spinWheel } className="bg-yellow-600">Spin Wheel</Button>
+                </div>
             </div>
 
             {/* Team Management Section */ }
