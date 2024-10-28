@@ -5,6 +5,7 @@ import { Button, Input } from '@nextui-org/react';
 import questionsData from '@/data/qna.json'; // Import the JSON data
 import io from 'socket.io-client';
 import Link from 'next/link';
+import Cookies from 'js-cookie';
 
 const socket = io('http://10.0.0.194:3000'); // Adjust to your server's URL
 
@@ -44,7 +45,7 @@ export default function ControlPage() {
         loadTeams();
 
         //check if passphrase is stored in local storage
-        const storedPassphrase = localStorage.getItem('passphrase');
+        const storedPassphrase = Cookies.get('passphrase');
         if (storedPassphrase === correctPassphrase) {
             setIsAuthenticated(true);
         }
@@ -75,7 +76,7 @@ export default function ControlPage() {
     const handlePassphraseSubmit = () => {
         if (passphrase === correctPassphrase) {
             setIsAuthenticated(true); // Allow access if passphrase is correct
-            localStorage.setItem('passphrase', passphrase); // Store the passphrase in local storage
+            Cookies.set('passphrase', passphrase, { expires: 1, secure: true, sameSite: 'Strict' }); // Store passphrase in cookie
         } else {
             alert("Incorrect passphrase, please try again.");
         }
