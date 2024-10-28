@@ -5,6 +5,10 @@ import Rules from '@/app/components/rules';
 import { Button } from '@nextui-org/button';
 import { Input } from '@nextui-org/react';
 import Link from 'next/link';
+import io from 'socket.io-client';
+
+
+const socket = io('http://10.0.0.194:3000'); // Adjust to your server's URL
 
 interface Team {
     name: string;
@@ -45,6 +49,7 @@ const App: React.FC = () => {
         if (response.ok) {
             setTeamName('');
             loadTeams(); // Reload teams after adding
+            socket.emit('teams'); // Notify clients of updated
             setHasAdded(true);
         }
     };
