@@ -2,9 +2,8 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Button, Input } from '@nextui-org/react';
+import { Button } from '@nextui-org/react';
 
 export default function Home() {
   return (
@@ -24,6 +23,11 @@ export default function Home() {
         <Link href="/display">
           <Button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
             Display Page
+          </Button>
+        </Link>
+        <Link href="/qrPage">
+          <Button className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+            QR Code
           </Button>
         </Link>
       </div>

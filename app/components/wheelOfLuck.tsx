@@ -39,7 +39,7 @@ function ListOfFortune({ type }: { type: string }) {
             clearTimeout(timeoutId); // Clear timeout on unmount
 
         }
-    }, []);
+    });
 
     // At the top, add a utility to generate a random number within a range
     const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -113,7 +113,7 @@ interface ItemListProps {
     isRolling: boolean;
 }
 
-const ItemList: React.FC<ItemListProps> = ({ items, selectedIndex, isRolling }) => {
+const ItemList: React.FC<ItemListProps> = ({ items, selectedIndex }) => {
     return (
         <ul style={ { listStyleType: 'none', padding: 0, margin: 0 } }>
             { items.map((item, index) => (

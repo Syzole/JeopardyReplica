@@ -54,21 +54,6 @@ const App: React.FC = () => {
         }
     };
 
-    // Function to remove a team
-    const removeTeam = async (name: string) => {
-        const response = await fetch('/api/teams', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name }),
-        });
-
-        if (response.ok) {
-            loadTeams(); // Reload teams after removing
-        }
-    };
-
     return (
         <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center space--4">
             <div className="text-center">

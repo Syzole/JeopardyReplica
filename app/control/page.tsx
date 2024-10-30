@@ -31,8 +31,7 @@ export default function ControlPage() {
     const [ isAuthenticated, setIsAuthenticated ] = useState<boolean>(false); // Whether the user is authenticated
     const correctPassphrase = process.env.NEXT_PUBLIC_PASSPHRASE || 'password'; // Correct passphrase
     const [ buzzOrder, setBuzzOrder ] = useState<string[]>([]);
-
-    console.log(correctPassphrase);
+    const [ showPlayers, setShowPlayers ] = useState<boolean>(true); // Whether to show the players or only display on control page
 
     // Load teams from the server on mount
     useEffect(() => {
@@ -70,7 +69,7 @@ export default function ControlPage() {
             socket.off('selectedQuestions');
             socket.off('teams');
         };
-    }, []);
+    }, [ correctPassphrase ]);
 
     // Function to handle passphrase submission
     const handlePassphraseSubmit = () => {
@@ -119,12 +118,13 @@ export default function ControlPage() {
 
     // Function to set a new question
     const handleSelectQuestion = (question: Question) => {
+
+        if (showPlayers) {
+            socket.emit('newQuestion', question); // Emit the selected question to the display page
+        }
+
         setSelectedQuestion(question);
-        selectedQuestions[ `${question.question}-${question.points}` ] = true; // Mark the question as selected
-        let updatedQuestions = { ...selectedQuestions };
-        setSelectedQuestions(updatedQuestions); // Update the selected questions state
-        socket.emit('newQuestion', question); // Emit the selected question to the display page
-        socket.emit('updateSelectedQuestions', updatedQuestions); // Send the updated state to the server
+
     };
 
     // Function to reveal the answer
@@ -184,7 +184,7 @@ export default function ControlPage() {
 
     // Function to reset the buzzer
     const resetBuzzer = () => {
-        let sure = window.confirm("Are you sure you want to reset the buzzer?");
+        const sure = window.confirm("Are you sure you want to reset the buzzer?");
         if (!sure) {
             return;
         }
@@ -203,6 +203,10 @@ export default function ControlPage() {
     const spinWheel = () => {
         socket.emit('spinWheel');
     };
+
+    const toggleShowPlayers = () => {
+        setShowPlayers((prev) => !prev);
+    }
 
     if (!isAuthenticated) {
         return (
@@ -235,12 +239,15 @@ export default function ControlPage() {
                         Reset Buzzer
                     </Button>
                     <Button onClick={ removeTopBuzzer } className="bg-blue-600"> Next Buzzer</Button>
+                    <Button onClick={ toggleShowPlayers } className={ `${showPlayers ? 'bg-green-600' : 'bg-red-600'}` }>{ showPlayers ? 'Showing Players' : 'Control Only' }</Button>
+
                 </div>
                 <div className='flex space-x-4'>
                     <Button onClick={ () => sendWheelType('good') } className="bg-green-600">Good Wheel</Button>
                     <Button onClick={ () => sendWheelType('bad') } className="bg-red-600">Bad Wheel</Button>
                     <Button onClick={ () => sendWheelType(null) } className="bg-blue-600">Reset Wheel</Button>
                     <Button onClick={ spinWheel } className="bg-yellow-600">Spin Wheel</Button>
+                    <Button onClick={ () => console.log(selectedQuestions) } className="bg-blue-600">Console.log</Button>
                 </div>
             </div>
 
@@ -327,14 +334,14 @@ export default function ControlPage() {
                         <div className='items-start'>
                             <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mb-2">
                                 <p className="text-lg font-semibold text-black">{ selectedQuestion.question }</p>
-                                <p className="mt-4 text-md text-gray-600">Answer: { selectedQuestion.answer }</p>
+                                <p className="mt-4 text-md text-gray-600">Answer: { showPlayers ? selectedQuestion.answer : '****' }</p>
                                 <p className="mt-4 text-md text-gray-600">Points: { selectedQuestion.points }</p>
                                 <div className="mt-4 flex space-x-4">
                                     <Button onClick={ revealAnswer } className="bg-blue-600 text-white px-4 py-2 rounded-lg">
                                         Reveal Answer
                                     </Button>
                                     <Button onClick={ () => {
-                                        let teamIndex = teams.findIndex((team) => team.name === buzzOrder[ 0 ]);
+                                        const teamIndex = teams.findIndex((team) => team.name === buzzOrder[ 0 ]);
                                         handleIncorrectAnswer(teamIndex);
                                         socket.emit('removeTopBuzzer');
                                     } } className="bg-green-600 text-white"> Next Buzzer</Button>
@@ -345,12 +352,17 @@ export default function ControlPage() {
                                         Close
                                     </Button>
                                 </div>
+                                { !showPlayers && (
+                                    <Button onClick={ () => setShowPlayers(true) } className="bg-blue-600 text-white px-4 py-2 rounded-lg mt-4">Show answer to Control</Button>
+                                ) }
                             </div>
                             <div className=' bg-white rounded-lg justify-center items-center flex flex-col'>
                                 <h2 className="text-2xl font-semibold mb-4 text-black">Select Team For Points:</h2>
                                 <div className='flex flex-row'>
                                     { teams.map((team, index) => (
-                                        <div className='flex flex-col'>
+                                        <div className='flex flex-col'
+                                            key={ index }
+                                        >
                                             <Button
                                                 key={ index }
                                                 onClick={ () => handleCorrectAnswer(index) }
