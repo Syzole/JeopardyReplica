@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import { Button } from '@nextui-org/react';
+import { controlPassword, hostingIP } from '@/constants';
 
 // Initialize the socket connection
-const socket = io('http://10.0.0.194:3000'); // Replace with your server's URL
+const socket = io(hostingIP); // Replace with your server's URL
 
 interface Team {
     name: string;
@@ -128,7 +129,7 @@ const BuzzerPage: React.FC = () => {
                         onClick={ handleNameSubmit }
                         className="bg-blue-600 text-white"
                     >
-                        Submit Name
+                        Join as Team
                     </Button>
                     { nameError && <p className="text-red-500 mt-2">{ nameError }</p> }
                 </div>

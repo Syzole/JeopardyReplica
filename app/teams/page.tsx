@@ -5,8 +5,9 @@ import { useState, useEffect } from 'react';
 import { Button, Input } from '@nextui-org/react';
 import Link from 'next/link';
 import io from 'socket.io-client';
+import { hostingIP } from '@/constants';
 
-const socket = io('http://10.0.0.194:3000'); // Adjust to your server's URL
+const socket = io(hostingIP); // Adjust to your server's URL
 
 interface Team {
     name: string;

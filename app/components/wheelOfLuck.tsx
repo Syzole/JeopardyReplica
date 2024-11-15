@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import wheelEffects from '@/data/wheelEffects.json';
 import io from 'socket.io-client';
+import { hostingIP } from '@/constants';
 
-const socket = io('http://10.0.0.194:3000'); // Adjust to your server's URL
+const socket = io(hostingIP); // Adjust to your server's URL
 
 interface effects {
     effect: string;

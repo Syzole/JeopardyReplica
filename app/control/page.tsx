@@ -6,8 +6,9 @@ import questionsData from '@/data/qna.json'; // Import the JSON data
 import io from 'socket.io-client';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
+import { controlPassword, hostingIP } from '@/constants';
 
-const socket = io('http://10.0.0.194:3000'); // Adjust to your server's URL
+const socket = io(hostingIP); // Adjust to your server's URL
 
 // Define the team structure
 interface Team {
@@ -29,7 +30,7 @@ export default function ControlPage() {
     const [ selectedQuestions, setSelectedQuestions ] = useState<Record<string, boolean>>({});
     const [ passphrase, setPassphrase ] = useState<string>(''); // State for storing the passphrase input
     const [ isAuthenticated, setIsAuthenticated ] = useState<boolean>(false); // Whether the user is authenticated
-    const correctPassphrase = process.env.NEXT_PUBLIC_PASSPHRASE || 'password'; // Correct passphrase
+    const correctPassphrase = controlPassword || 'password'; // Correct passphrase
     const [ buzzOrder, setBuzzOrder ] = useState<string[]>([]);
     const [ showPlayers, setShowPlayers ] = useState<boolean>(true); // Whether to show the players or only display on control page
 
@@ -75,7 +76,7 @@ export default function ControlPage() {
     const handlePassphraseSubmit = () => {
         if (passphrase === correctPassphrase) {
             setIsAuthenticated(true); // Allow access if passphrase is correct
-            Cookies.set('passphrase', passphrase, { expires: 1, secure: true, sameSite: 'Strict' }); // Store passphrase in cookie
+            Cookies.set('passphrase', passphrase, { expires: 1, secure: false, sameSite: 'Strict' }); // Store passphrase in cookie
         } else {
             alert("Incorrect passphrase, please try again.");
         }

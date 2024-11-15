@@ -5,8 +5,9 @@ import io from 'socket.io-client';
 import questionsData from '@/data/qna.json'; // Import the JSON data for questions
 import { Question } from '../control/page';
 import ListOfFortune from '../components/wheelOfLuck';
+import { hostingIP } from '@/constants';
 
-const socket = io('http://10.0.0.194:3000'); // Adjust to your server's URL
+const socket = io(hostingIP); // Adjust to your server's URL
 
 // Define the team structure
 interface Team {

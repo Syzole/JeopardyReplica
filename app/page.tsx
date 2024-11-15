@@ -7,9 +7,9 @@ import { Button } from '@nextui-org/react';
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white text-center">
       <h1 className="text-4xl font-bold mb-4">Welcome to the Jeopardy</h1>
-      <div className="flex space-x-4">
+      <div className="flex flex-col items-center text-center justify-center space-y-4">
         <Link href="/adminRules">
           <Button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             Admin rules and controls

@@ -12,7 +12,7 @@ export default function QRCodeGenerator() {
     useEffect(() => {
         const generateQrCode = async () => {
             if (typeof window === "undefined") return; // Check if client-side
-            const currentUrl = window.location.href;
+            const currentUrl = window.location.origin;
 
             try {
                 const qrCodeDataUrl = await QRCode.toDataURL(currentUrl);
@@ -26,9 +26,15 @@ export default function QRCodeGenerator() {
     }, []); // No router dependency
 
     return (
-        <div>
+        <div className="flex items-center justify-center min-h-screen"> {/* Centering the content */ }
             { qrCodeUrl ? (
-                <Image src={ qrCodeUrl } alt="QR Code" />
+                <Image
+                    src={ qrCodeUrl }
+                    alt="QR Code"
+                    width={ 300 } // Set width of the QR code
+                    height={ 300 } // Set height of the QR code
+                    className="mx-auto" // Center the image horizontally
+                />
             ) : (
                 <p>Loading QR code...</p>
             ) }
