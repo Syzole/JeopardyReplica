@@ -7,7 +7,7 @@ interface RulesProps {
 
 const Rules: React.FC<RulesProps> = ({ showAdminNotes = false }) => {
     return (
-        <div className="p-8 max-w-3xl mx-auto  rounded-lg shadow-md">
+        <div className="p-8 max-w-3xl mx-auto  rounded-lg shadow-md flex flex-col">
             <h1 className="text-3xl font-bold mb-4 text-center text-blue-600">Jeopardy Party Game Rules</h1>
 
             {/* Player Rules Section */ }

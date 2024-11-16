@@ -48,3 +48,17 @@ export async function DELETE(request: Request) {
 	writeTeamsToFile(teams);
 	return NextResponse.json({ message: "Team removed", data: teams });
 }
+
+export async function PATCH(request: Request) {
+	const { name } = await request.json();
+	const teams = readTeamsFromFile();
+	const teamIndex = teams.findIndex((team: Team) => team.name === name);
+
+	if (teamIndex === -1) {
+		return NextResponse.json({ message: "Team not found" }, { status: 404 });
+	}
+
+	//teams[teamIndex].points += points;
+	writeTeamsToFile(teams);
+	return NextResponse.json({ message: "Points added", data: teams });
+}

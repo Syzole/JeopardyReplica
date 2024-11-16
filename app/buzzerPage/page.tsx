@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import { Button } from '@nextui-org/react';
-import { controlPassword, hostingIP } from '@/constants';
+import { hostingIP } from '@/constants';
 
 // Initialize the socket connection
 const socket = io(hostingIP); // Replace with your server's URL
@@ -29,7 +29,7 @@ const BuzzerPage: React.FC = () => {
         const loadTeams = async () => {
             const response = await fetch('/api/teams');
             const data = await response.json();
-            data.sort((a: Team, b: Team) => b.points - a.points); // Sort teams by points
+            //data.sort((a: Team, b: Team) => b.points - a.points); // Sort teams by points
             setTeams(data);
         };
         loadTeams();
@@ -56,8 +56,8 @@ const BuzzerPage: React.FC = () => {
     // Handle the buzz action
     const handleBuzz = () => {
         if (name && !hasBuzzed) {
-            socket.emit('buzz', name); // Send the user's buzz event to the server
             setHasBuzzed(true); // Disable further buzzing for this user
+            setTimeout(() => socket.emit('buzz', name), 50); // Send the buzz to the server with a slight delay
         }
     };
 
@@ -66,6 +66,10 @@ const BuzzerPage: React.FC = () => {
         socket.on('resetBuzzer', () => {
             setHasBuzzed(false); // Enable buzzing again
             setBuzzOrder([]); // Clear the buzz order
+        });
+
+        socket.on("disableBuzzers", () => {
+            setHasBuzzed(true);
         });
 
         return () => {
@@ -86,7 +90,7 @@ const BuzzerPage: React.FC = () => {
                 }
             });
         } else {
-            alert("Please enter a valid name!");
+            alert("Please select a name!");
         }
     };
 

@@ -1,0 +1,64 @@
+{
+	"categories": [
+		{
+			"name": "Internet Chaos",
+			"questions": [
+				{ "points": 100, "question": "This term refers to the act of oversharing personal details or thoughts on social media.", "answer": "TMI" },
+				{ "points": 200, "question": "In the Skibidi Toilet saga, this character is known for their musical outbursts.", "answer": "Skibidi Toilet" },
+				{ "points": 300, "question": "What is the maximum aura level attainable by a Sigma male?", "answer": "Infinite" },
+				{ "points": 400, "question": "This phrase describes the act of staring intensely, often accompanied by an ominous bass boost sound effect.", "answer": "Ohio Stare" },
+				{ "points": 500, "question": "This fictional character is often memed as saying 'Are ya winning, son?'", "answer": "Dad" },
+				{ "points": 600, "question": "This level of drip (stylish clothing or attitude) causes everyone around you to faint from sheer awe.", "answer": "Max Drip" },
+				{ "points": 700, "question": "This dance move involves aggressively stomping while emitting high-energy 'bass drops.'", "answer": "Skibidi Dop Dop Dance" }
+			]
+		},
+		{
+			"name": "Memeology",
+			"questions": [
+				{ "points": 100, "question": "What vegetable is famous for its 'bingus-like' texture and meme status?", "answer": "Onion" },
+				{ "points": 200, "question": "Name the internet-famous cat with the most Sigma aura.", "answer": "Gigachad Cat" },
+				{ "points": 300, "question": "This number is a universal symbol of the funny internet weed joke.", "answer": "420" },
+				{ "points": 400, "question": "This meme involves pointing at a random image and saying 'That’s a bit ___, innit?'", "answer": "Sus" },
+				{ "points": 500, "question": "This internet figure is known for saying 'Let him cook.'", "answer": "Walter White (Breaking Bad)" },
+				{ "points": 600, "question": "In meme lore, this phrase describes ultimate betrayal: 'He attacc, he protecc, but most importantly...'", "answer": "He turn his bacc" },
+				{ "points": 700, "question": "This 2010s trend involved making any animal, person, or object into a hyper-saturated, swole 'Chad' version of itself.", "answer": "Gigachadification" }
+			]
+		},
+		{
+			"name": "Certified Sigma Moments",
+			"questions": [
+				{ "points": 100, "question": "This character was rejected by society and decided to live by their own rules. Name the Sigma.", "answer": "Joker" },
+				{ "points": 200, "question": "What is the term for a male wolf that thrives alone, rejecting the Alpha/Beta hierarchy?", "answer": "Sigma Male" },
+				{ "points": 300, "question": "If someone has 'unspoken rizz,' what does it mean?", "answer": "They can charm someone without saying a word" },
+				{ "points": 400, "question": "This term describes the moment a Sigma defies societal norms with max efficiency.", "answer": "Sigma Grindset" },
+				{ "points": 500, "question": "Complete this phrase: 'Wake up, hustle, ___.'", "answer": "Repeat" },
+				{ "points": 600, "question": "This meme-worthy phrase indicates one has surpassed all social expectations: 'I’m built ___.''", "answer": "Different" },
+				{ "points": 700, "question": "This phenomenon occurs when someone’s Sigma energy affects their surroundings: 'The __ Sigma Effect.'", "answer": "Massive" }
+			]
+		},
+		{
+			"name": "Skibidi Chronicles",
+			"questions": [
+				{ "points": 100, "question": "What sound is associated with Skibidi Toilet?", "answer": "Dop Dop Dop Dop Yes Yes Yes" },
+				{ "points": 200, "question": "In Skibidi lore, who is the ultimate enemy of the Toilets?", "answer": "Camera Men" },
+				{ "points": 300, "question": "This character in Skibidi lore is known for singing in deep operatic tones.", "answer": "Speaker Man" },
+				{ "points": 400, "question": "This bizarre dance move combines hyper stomping with chaotic head movements.", "answer": "Skibidi Shuffle" },
+				{ "points": 500, "question": "What’s the most powerful weapon used in Skibidi Toilet warfare?", "answer": "Flush Cannon" },
+				{ "points": 600, "question": "What’s the capital of Skibidiland?", "answer": "Yes Dop City" },
+				{ "points": 700, "question": "In the lore, what is the prophecy of the final Skibidi battle?", "answer": "The Great Flush" }
+			]
+		},
+		{
+			"name": "Pure Chaos",
+			"questions": [
+				{ "points": 100, "question": "This phrase describes ultimate confusion: 'What in the ___?'", "answer": "Ohio" },
+				{ "points": 200, "question": "What’s the airspeed velocity of an unladen swallow?", "answer": "What do you mean, African or European?" },
+				{ "points": 300, "question": "What is the ultimate food according to internet memelords?", "answer": "Beans" },
+				{ "points": 400, "question": "Complete the phrase: 'It’s Morbin ___.'", "answer": "Time" },
+				{ "points": 500, "question": "What’s 9 + 10?", "answer": "21" },
+				{ "points": 600, "question": "This phrase is yelled when gamers make a critical mistake.", "answer": "Bruh Moment" },
+				{ "points": 700, "question": "This is the ultimate meme response when all logic fails: 'Just __ it.'", "answer": "Vibe" }
+			]
+		}
+	]
+}

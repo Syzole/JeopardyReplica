@@ -33,6 +33,15 @@ const App: React.FC = () => {
     // Load teams on component mount
     useEffect(() => {
         loadTeams();
+
+        socket.on("teams", () => {
+            loadTeams();
+        });
+
+        return () => {
+            socket.off("teams");
+        }
+
     }, []);
 
     // Function to add a new team
@@ -47,12 +56,19 @@ const App: React.FC = () => {
             body: JSON.stringify({ name: teamName }),
         });
 
-        if (response.ok) {
+        console.log(response);
+
+        if (response.status !== 400) {
             setTeamName('');
             loadTeams(); // Reload teams after adding
-            socket.emit('teams'); // Notify clients of updated
             setHasAdded(true);
+            socket.emit('teams'); // Notify clients of updated
+            return;
         }
+
+        window.alert('Team name already exists');
+        setHasAdded(false);
+        setTeamName('');
     };
 
     return (
@@ -70,11 +86,15 @@ const App: React.FC = () => {
                         placeholder="Team Name"
                         value={ teamName }
                         onChange={ (e) => setTeamName(e.target.value) }
-                        className={ "mr-4" + (hasAdded ? ' bg-gray-300' : 'bg-cyan-800') }
+                        className={ "mr-4 " }
                     />
-                    <Button onClick={ addTeam }
-                        disabled={ hasAdded }
-                    >Add Team</Button>
+                    <Button
+                        onClick={ addTeam }
+                        disabled={ hasAdded } // Keep the button disabled when `hasAdded` is true
+                        color={ hasAdded ? 'success' : 'primary' }
+                    >
+                        { hasAdded ? 'Team Added!' : 'Add Team' }
+                    </Button>
                 </div>
 
                 <div className="mt-8">

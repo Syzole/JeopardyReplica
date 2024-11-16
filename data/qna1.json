@@ -1,0 +1,80 @@
+{
+	"categories": [
+		{
+			"name": "Geography",
+			"questions": [
+				{ "points": 100, "question": "More than 75% of the earth's surface is covered in this", "answer": "Air" },
+				{ "points": 200, "question": "What country could be used as a response to the question. How are you feeling, and what kind of card do you drive?", "answer": "Madagascar" },
+				{ "points": 300, "question": "This pile of trash is roughly 1/3 the size of texas and is located in the Atlantic ocean", "answer": "The United Kingdom" },
+				{ "points": 400, "question": "This country's leader is famous for having the smallest male genitalia", "answer": "Russia" },
+				{ "points": 500, "question": "What animal can hold its breath underwater the longest", "answer": "Fish" },
+				{ "points": 600, "question": "Despite what many people may believe, this is the real tallest mountain in the world", "answer": "Mount Everest" },
+				{ "points": 700, "question": "This country is located north of South Korea", "answer": "North Korea" }
+			]
+		},
+		{
+			"name": "Logic",
+			"questions": [
+				{ "points": 100, "question": "Whenever A is true, B is always true. If A is false, what do we know about B?", "answer": "Nothing" },
+				{ "points": 200, "question": "John has 10 candles. Each candle can burn for 10 minutes. John lights all of his candles. How long will the candles burn for?", "answer": "100 minutes" },
+				{ "points": 300, "question": "If you have 3 apples and you take away 2, how many do you have?", "answer": "2" },
+				{ "points": 400, "question": "How much was $1.00 USD worth in 1976?", "answer": "$1.00" },
+				{ "points": 500, "question": "What is this? (Insert Picture of a Bird)", "answer": "A bird" },
+				{ "points": 600, "question": "What is the least common answer to the question: pick a number randomly between 1-10?", "answer": "10" },
+				{ "points": 700, "question": "During what decade was the first computer designed?", "answer": "1822" }
+			]
+		},
+		{
+			"name": "Anatomy",
+			"questions": [
+				{ "points": 100, "question": "True or False (explain your answer): There is a hole located in your lungs that you couldn't breathe without.", "answer": "True, the windpipe" },
+				{ "points": 200, "question": "What is the laziest organ in the human body?", "answer": "The brain" },
+				{ "points": 300, "question": "Power house?", "answer": "Mitochondria" },
+				{ "points": 400, "question": "True or False (explain your answer): A human can 100% survive without a stomach.", "answer": "True, the stomach is not a vital organ" },
+				{ "points": 500, "question": "While some people are born without this, those who are born with it usually tend to cut it for hygiene reasons.", "answer": "Hair" },
+				{ "points": 600, "question": "What is the largest organ in the human body?", "answer": "The skin" },
+				{
+					"points": 700,
+					"question": "True or False (explain your answer): There are 4 states of matter: solid, liquid, gas, and plasma, and your body has plasma in it.",
+					"answer": "True, blood has plasma"
+				}
+			]
+		},
+		{
+			"name": "Fantasy",
+			"questions": [
+				{ "points": 100, "question": "Name a five-headed dragon in Yu-Gi-Oh.", "answer": "Five-headed Dragon" },
+				{ "points": 200, "question": "This mythological creature is depicted with scales, a lizard-like appearance, and in some cases having multiple heads.", "answer": "Hydra" },
+				{ "points": 300, "question": "This tabletop role-playing game has players act out fantasy characters and roll dice.", "answer": "Pathfinder" },
+				{ "points": 400, "question": "A healer, a wizard, and a tank walk into a bar. What is wrong with this statement?", "answer": "There are no commas or the tank is not in the front" },
+				{ "points": 500, "question": "Roll a d20. 1-10: success, 11-20: fail.", "answer": "1-10 success, 11-20 fail" },
+				{ "points": 600, "question": "How many hammers are there in a war?", "answer": "40,000" },
+				{ "points": 700, "question": "What’s your favorite Pokémon?", "answer": "Rayquaza" }
+			]
+		},
+		{
+			"name": "Quantum Physics and Relativity",
+			"questions": [
+				{ "points": 100, "question": "What rough estimation is commonly used for the speed of light in m/s?", "answer": "300,000,000 m/s or 3 x 10^8 m/s" },
+				{ "points": 200, "question": "Name a big number.", "answer": "Any number greater than a trillion" },
+				{ "points": 300, "question": "Within 10 decimal points, how many solar luminosities is the sun?", "answer": "1" },
+				{ "points": 400, "question": "Is light a particle or a wave?", "answer": "Both" },
+				{ "points": 500, "question": "Why don't protons push each other away in an atom?", "answer": "The nuclear force is stronger than the electromagnetic force at close distances" },
+				{ "points": 600, "question": "This is the protagonist of a movie about a boy who creates and sells pots while living with his abusive aunt and uncle.", "answer": "Harry Potter" },
+				{ "points": 700, "question": "What is the smallest unit of matter?", "answer": "Quark" }
+			]
+		},
+		{
+			"name": "Test",
+			"questions": [
+				{ "points": 100, "question": "Test", "answer": "Test" },
+				{ "points": 200, "question": "Test", "answer": "Test" },
+				{ "points": 300, "question": "Test", "answer": "Test" },
+				{ "points": 400, "question": "Test", "answer": "Test" },
+				{ "points": 500, "question": "Test", "answer": "Test" },
+				{ "points": 600, "question": "Test", "answer": "Test" },
+				{ "points": 700, "question": "Test", "answer": "Test" }
+			]
+		}
+	]
+}

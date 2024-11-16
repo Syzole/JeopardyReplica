@@ -23,6 +23,7 @@ export default function DisplayPage() {
     const [ teams, setTeams ] = useState<Team[]>([]);
     const [ buzzOrder, setBuzzOrder ] = useState<string[]>([]); // New state for buzz order
     const [ wheelType, setWheelType ] = useState<'good' | 'bad' | null>(null);
+    const [ showQuestionText, setShowQuestionText ] = useState(false);
 
     const currentQuestionRef = useRef(currentQuestion); // Ref to track the current question
 
@@ -49,6 +50,10 @@ export default function DisplayPage() {
             setRevealedAnswer(null);
         });
 
+        socket.on("revalQuestion", () => {
+            setShowQuestionText(true);
+        });
+
         // Listen for the "revealAnswer" event
         socket.on('revealAnswer', (answer: string, selectedQuestions: Record<string, boolean>) => {
             setRevealedAnswer(answer);
@@ -63,6 +68,7 @@ export default function DisplayPage() {
             setCurrentQuestion(null);
             setRevealedAnswer(null);
             setBuzzOrder([]); // Reset buzz order
+            setShowQuestionText(false);
         });
 
         // Handle buzz event
@@ -123,10 +129,12 @@ export default function DisplayPage() {
                 <div className='flex flex-row gap-x-8 justify-center items-center h-full'>
                     <div className="bg-gray-800 p-20 rounded-lg shadow-lg w-full max-w-4xl mb-12 items-center flex flex-col">
                         <p className="text-6xl text-sky-400 mb-20">{ `${findQuestionCategory(currentQuestion)}` }</p>
-                        <p className="text-6xl font-semibold">{ currentQuestion.question }</p>
+                        <p className={ `text-6xl font-semibold ${showQuestionText ? '' : 'blur-lg'}` }>
+                            { currentQuestion.question }
+                        </p>
                         <p className="mt-8 text-6xl">Points: { currentQuestion.points }</p>
                         { revealedAnswer && (
-                            <p className="mt-8 text-6xl text-green-400">Answer: { revealedAnswer }</p>
+                            <p className="mt-8 text-6xl text-green-400 text-center">Answer: { revealedAnswer }</p>
                         ) }
                     </div>
                     {/* Teams Section with Buzz Order */ }
@@ -165,9 +173,9 @@ export default function DisplayPage() {
                 </div>
             ) : (
                 // Main content container for the board and teams
-                <div className="flex flex-wrap w-full h-full p-4 bg-gray-900 items-center">
+                <div className="flex w-full h-full p-4 bg-gray-900 items-center">
                     {/* Question Board */ }
-                    <div className="flex-grow flex flex-wrap justify-center items-start p-3 bg-gray-900 overflow-hidden">
+                    <div className="flex-grow flex justify-center items-start p-3 bg-gray-900 overflow-hidden">
                         { questionsData.categories.map((category, index) => (
                             <div
                                 key={ index }

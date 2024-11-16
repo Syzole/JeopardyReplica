@@ -7,6 +7,7 @@ import io from 'socket.io-client';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
 import { controlPassword, hostingIP } from '@/constants';
+import { TeamItem } from '../components/teamItem';
 
 const socket = io(hostingIP); // Adjust to your server's URL
 
@@ -33,6 +34,7 @@ export default function ControlPage() {
     const correctPassphrase = controlPassword || 'password'; // Correct passphrase
     const [ buzzOrder, setBuzzOrder ] = useState<string[]>([]);
     const [ showPlayers, setShowPlayers ] = useState<boolean>(true); // Whether to show the players or only display on control page
+    const [ showSwapPage, setShowSwapPage ] = useState<boolean>(false); // Whether to show the swap page
 
     // Load teams from the server on mount
     useEffect(() => {
@@ -151,14 +153,6 @@ export default function ControlPage() {
         if (selectedQuestion) {
             const points = teams[ teamIndex ].points + selectedQuestion.points;
             const updatedTeam = { ...teams[ teamIndex ], points: points };
-
-            //use alert to ask for confirmation
-            // let sure = window.confirm("Are you sure you want to add " + selectedQuestion.points + " points to " + updatedTeam.name + " ?");
-
-            // if (!sure) {
-            //     return;
-            // }
-
             socket.emit('addPoints', updatedTeam.name, selectedQuestion.points); // Emit event to add points
             setTeams((prev) => prev.map((team, idx) => (idx === teamIndex ? updatedTeam : team))); // Update local state
         }
@@ -209,6 +203,55 @@ export default function ControlPage() {
         setShowPlayers((prev) => !prev);
     }
 
+    const swapPlayerPoints = (team1: string, team2: string) => {
+        // swap teams on this page
+        const team1Index = teams.findIndex((team) => team.name === team1);
+        const team2Index = teams.findIndex((team) => team.name === team2);
+
+        if (team1Index === -1 || team2Index === -1) {
+            return;
+        }
+
+        const tempPoints = teams[ team1Index ].points;
+        const updatedTeams = [ ...teams ];
+        updatedTeams[ team1Index ].points = updatedTeams[ team2Index ].points;
+        updatedTeams[ team2Index ].points = tempPoints;
+
+        setTeams(updatedTeams);
+
+        socket.emit("updateTeams", teams);
+    };
+
+    const randomizeTeamPoints = () => {
+        // Create a copy of the teams
+        const updatedTeams = [ ...teams ];
+
+        // Extract points and shuffle them
+        const points = updatedTeams.map(team => team.points);
+        for (let i = points.length - 1; i > 0; i--) {
+            const randomIndex = Math.floor(Math.random() * (i + 1));
+            [ points[ i ], points[ randomIndex ] ] = [ points[ randomIndex ], points[ i ] ]; // Swap
+        }
+
+        // Assign shuffled points back without mutating state
+        const shuffledTeams = updatedTeams.map((team, index) => ({
+            ...team,
+            points: points[ index ],
+        }));
+
+        // Update state with new teams
+        setTeams(shuffledTeams);
+
+        // Emit the updated teams
+        socket.emit("updateTeams", shuffledTeams);
+    };
+
+    const revealQuestion = () => {
+        console.log("Revealing Question");
+        socket.emit("revalQuestion");
+    };
+
+
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
@@ -239,6 +282,9 @@ export default function ControlPage() {
                     <Button onClick={ resetBuzzer } className="bg-yellow-600">
                         Reset Buzzer
                     </Button>
+                    <Button onClick={ () => setShowSwapPage(true) } className={ `bg-blue-600` }>
+                        Swap Players Points
+                    </Button>
                     <Button onClick={ removeTopBuzzer } className="bg-blue-600"> Next Buzzer</Button>
                     <Button onClick={ toggleShowPlayers } className={ `${showPlayers ? 'bg-green-600' : 'bg-red-600'}` }>{ showPlayers ? 'Showing Players' : 'Control Only' }</Button>
 
@@ -248,7 +294,6 @@ export default function ControlPage() {
                     <Button onClick={ () => sendWheelType('bad') } className="bg-red-600">Bad Wheel</Button>
                     <Button onClick={ () => sendWheelType(null) } className="bg-blue-600">Reset Wheel</Button>
                     <Button onClick={ spinWheel } className="bg-yellow-600">Spin Wheel</Button>
-                    <Button onClick={ () => console.log(selectedQuestions) } className="bg-blue-600">Console.log</Button>
                 </div>
             </div>
 
@@ -257,31 +302,17 @@ export default function ControlPage() {
                 <h2 className="text-2xl font-semibold mb-4">Manage Teams:</h2>
 
                 { teams.length > 0 ? (
-                    <div>
-                        <h3 className="text-xl font-semibold mb-2">Teams:</h3>
-                        <ul className="space-y-2">
-                            { teams.map((team, index) => (
-                                <li key={ index } className={ `bg-gray-800 p-4 rounded-lg flex justify-between items-center ` }>
-                                    <div>
-                                        <span className="font-bold">{ team.name }</span>: { team.points } points
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        {/* Input for manually entering points */ }
-                                        <Input
-                                            value={ teamPointsInput[ index ] || '' }
-                                            onChange={ (e) => handlePointsInputChange(index, e.target.value) }
-                                            className="w-20"
-                                            placeholder="Points"
-                                            type="number"
-                                        />
-                                        <Button onClick={ () => updatePoints(index) } className="bg-blue-600 text-white">
-                                            Set Points
-                                        </Button>
-                                    </div>
-                                </li>
-                            )) }
-                        </ul>
-                    </div>
+                    <ul className="space-y-2">
+                        { teams.map((team, index) => (
+                            <TeamItem
+                                key={ team.name }
+                                team={ team }
+                                pointsInput={ teamPointsInput[ index ] || '' }
+                                onPointsInputChange={ (value) => handlePointsInputChange(index, value) }
+                                onUpdatePoints={ () => updatePoints(index) }
+                            />
+                        )) }
+                    </ul>
                 ) : (
                     <p className="text-gray-400">No teams created yet.</p>
                 ) }
@@ -331,13 +362,13 @@ export default function ControlPage() {
             {/* Display selected question and answer */ }
             { selectedQuestion && (
                 <div className='fixed inset-0 bg-gray-800 bg-opacity-75 z-10 justify-center items-center flex'>
-                    <div className="  flex justify-center items-center flex-col mr-2">
-                        <div className='items-start'>
-                            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mb-2">
-                                <p className="text-lg font-semibold text-black">{ selectedQuestion.question }</p>
-                                <p className="mt-4 text-md text-gray-600">Answer: { showPlayers ? selectedQuestion.answer : '****' }</p>
-                                <p className="mt-4 text-md text-gray-600">Points: { selectedQuestion.points }</p>
-                                <div className="mt-4 flex space-x-4">
+                    <div className="flex justify-center items-center flex-col">
+                        <div className='flex flex-col items-center'>
+                            <div className="bg-white p-6 rounded-lg shadow-lg w-full mb-2 flex flex-col flex-grow space-y-8">
+                                <p className="text-3xl font-semibold text-black text-wrap">{ selectedQuestion.question }</p>
+                                <p className="mt-4 text-3xl text-gray-600">Answer: { showPlayers ? selectedQuestion.answer : '****' }</p>
+                                <p className="mt-4 text-3xl text-gray-600">Points: { selectedQuestion.points }</p>
+                                <div className="mt-4 space-x-4 items-center justify-center flex">
                                     <Button onClick={ revealAnswer } className="bg-blue-600 text-white px-4 py-2 rounded-lg">
                                         Reveal Answer
                                     </Button>
@@ -352,12 +383,15 @@ export default function ControlPage() {
                                     <Button onClick={ () => setSelectedQuestion(null) } className="bg-gray-600 text-white px-4 py-2 rounded-lg">
                                         Close
                                     </Button>
+                                    <Button onClick={ revealQuestion } className="bg-gray-600 text-white px-4 py-2 rounded-lg">
+                                        Reval Question
+                                    </Button>
                                 </div>
                                 { !showPlayers && (
                                     <Button onClick={ () => setShowPlayers(true) } className="bg-blue-600 text-white px-4 py-2 rounded-lg mt-4">Show answer to Control</Button>
                                 ) }
                             </div>
-                            <div className=' bg-white rounded-lg justify-center items-center flex flex-col'>
+                            <div className=' bg-white rounded-lg justify-center items-center flex flex-col px-10'>
                                 <h2 className="text-2xl font-semibold mb-4 text-black">Select Team For Points:</h2>
                                 <div className='flex flex-row'>
                                     { teams.map((team, index) => (
@@ -365,14 +399,14 @@ export default function ControlPage() {
                                             key={ index }
                                         >
                                             <Button
-                                                key={ index }
+                                                key={ "Correct" + index }
                                                 onClick={ () => handleCorrectAnswer(index) }
                                                 className="bg-green-600 text-white px-4 py-2 rounded-lg mr-2 mb-2"
                                             >
                                                 { team.name }
                                             </Button>
                                             <Button
-                                                key={ index }
+                                                key={ "Incorrect " + index }
                                                 onClick={ () => handleIncorrectAnswer(index) }
                                                 className="bg-red-600 text-white px-4 py-2 rounded-lg mr-2 mb-2"
                                             >
@@ -404,6 +438,56 @@ export default function ControlPage() {
                     </div>
                 </div>
             ) }
+
+            {/* Swap Players Section */ }
+            { showSwapPage && (
+                <div className='fixed inset-0 bg-gray-800 bg-opacity-75 z-10 justify-center items-center flex'>
+                    <div className="bg-black p-6 rounded-lg shadow-lg max-w-md">
+                        <h2 className="text-2xl font-semibold mb-4">Swap Players Points:</h2>
+                        <div className='flex flex-col gap-4'>
+                            <div className='flex flex-col gap-4'>
+                                <select id="team1" className="bg-gray-700 text-white p-2 rounded-lg">
+                                    <option value="">Select Team 1</option>
+                                    { teams.map((team, index) => (
+                                        <option key={ index } value={ team.name }>{ team.name }</option>
+                                    )) }
+                                </select>
+                                <select id="team2" className="bg-gray-700 text-white p-2 rounded-lg">
+                                    <option value="">Select Team 2</option>
+                                    { teams.map((team, index) => (
+                                        <option key={ index } value={ team.name }>{ team.name }</option>
+                                    )) }
+                                </select>
+                                <Button
+                                    onClick={ () => {
+                                        const team1 = (document.getElementById('team1') as HTMLSelectElement).value;
+                                        const team2 = (document.getElementById('team2') as HTMLSelectElement).value;
+                                        if (team1 && team2) {
+                                            if (team1 === team2) {
+                                                alert('Please select two different teams to swap points.');
+                                            } else {
+                                                swapPlayerPoints(team1, team2);
+                                            }
+                                        } else {
+                                            alert('Please select both teams to swap points.');
+                                        }
+                                    } }
+                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                                >
+                                    Swap Points
+                                </Button>
+                            </div>
+                        </div>
+                        <Button onClick={ () => randomizeTeamPoints() } className="bg-blue-600 text-white px-4 py-2 rounded-lg mt-4">
+                            Randomize Points
+                        </Button>
+                        <Button onClick={ () => setShowSwapPage(false) } className="bg-gray-600 text-white px-4 py-2 rounded-lg mt-4">
+                            Close
+                        </Button>
+                    </div>
+                </div>
+            ) }
+
         </div>
     );
 }

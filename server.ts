@@ -14,6 +14,12 @@ interface Question {
 	points: number;
 }
 
+// Define the team structure
+interface Team {
+	name: string;
+	points: number;
+}
+
 let currentQuestion: Question | null = null;
 
 // Track which questions have been selected
@@ -77,6 +83,10 @@ app.prepare().then(() => {
 			io.emit("resetBuzzer"); // Optionally notify clients of buzzer reset
 		});
 
+		socket.on("disableBuzzers", () => {
+			io.emit("disableBuzzers"); // Disable buzzers on all clients
+		});
+
 		socket.on("removeTopBuzzer", () => {
 			buzzOrder.shift();
 			io.emit("buzz", buzzOrder, false); // Notify all clients of the updated buzz order
@@ -97,11 +107,16 @@ app.prepare().then(() => {
 
 			buzzOrder = []; // Clear the buzz order
 			io.emit("buzz", buzzOrder, false); // Notify all clients to clear their orders
-			io.emit("resetBuzzer"); // Optionally notify clients of buzzer reset
-
+			// io.emit("resetBuzzer"); // Optionally notify clients of buzzer reset
+			io.emit("disableBuzzers"); // Disable buzzers on all clients
 			// Send the question and updated selected questions to all clients
 			io.emit("currentQuestion", currentQuestion);
 			io.emit("selectedQuestions", selectedQuestions);
+		});
+
+		socket.on("revalQuestion", () => {
+			io.emit("revalQuestion");
+			io.emit("resetBuzzer");
 		});
 
 		socket.on("refreshSelectedQuestions", () => {
@@ -170,6 +185,11 @@ app.prepare().then(() => {
 
 		socket.on("spinWheel", () => {
 			io.emit("spinWheel");
+		});
+
+		socket.on("updateTeams", (teams: Team[]) => {
+			fs.writeFileSync(teamsFilePath, JSON.stringify(teams, null, 2), "utf-8");
+			io.emit("teams"); // Send the updated teams to all clients
 		});
 	});
 
