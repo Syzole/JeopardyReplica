@@ -1,0 +1,56 @@
+{
+	"goodLuck": [
+		{
+			"effect": "Earn a Bonus Hint!",
+			"type": "positive",
+			"description": "The player can ask for a hint on one of their questions this round."
+		},
+		{
+			"effect": "Double the Points of Your Next Correct Answer!",
+			"type": "positive",
+			"description": "If the player answers their next question correctly, they receive double the points."
+		},
+		{
+			"effect": "Gain a Free Pass!",
+			"type": "positive",
+			"description": "The player can skip one question of their choice without penalty."
+		},
+		{
+			"effect": "Immediate Extra Turn!",
+			"type": "positive",
+			"description": "The player takes another turn immediately after this one."
+		},
+		{
+			"effect": "Steal Points Half an Opponents Points!",
+			"type": "positive",
+			"description": "The player takes 50 points from a randomly selected opponent."
+		}
+	],
+	"badLuck": [
+		{
+			"effect": "Lose 25% of Your Current Score!",
+			"type": "negative",
+			"description": "The player loses a quarter of their current score."
+		},
+		{
+			"effect": "Miss a Turn and Lose 20 Points!",
+			"type": "negative",
+			"description": "The player skips a turn and loses 20 points."
+		},
+		{
+			"effect": "Switch Points with the Lowest-Scoring Player!",
+			"type": "negative",
+			"description": "The player switches their score with the player who has the lowest score."
+		},
+		{
+			"effect": "Lose a turn!",
+			"type": "negative",
+			"description": "The next player chooses the category for the affected player’s next turn."
+		},
+		{
+			"effect": "Reveal a Random Answer to All Players!",
+			"type": "negative",
+			"description": "A random question’s answer is shown to all players."
+		}
+	]
+}

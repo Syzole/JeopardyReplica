@@ -34,6 +34,7 @@ function ListOfFortune({ type }: { type: string }) {
 
         socket.on('spinWheel', () => {
             startSpinning();
+            startSpinning();
         });
 
         return () => {
@@ -57,7 +58,7 @@ function ListOfFortune({ type }: { type: string }) {
         let currentPhase = 'ACCELERATION';
         let step = 0;
 
-        const rollingSteps = getRandomInt(20, 50); // Randomize the number of steps in the rolling phase
+        const rollingSteps = getRandomInt(10, 12); // Randomize the number of steps in the rolling phase
         const performRoll = () => {
             let interval;
 
@@ -116,14 +117,15 @@ interface ItemListProps {
 
 const ItemList: React.FC<ItemListProps> = ({ items, selectedIndex }) => {
     return (
-        <ul style={ { listStyleType: 'none', padding: 0, margin: 0 } }>
+        <ul style={ { listStyleType: 'none', padding: 0, margin: 0 } } className='max-h-screen max-w-screen flex flex-col'>
             { items.map((item, index) => (
                 <motion.li
                     key={ index }
                     style={ {
                         padding: '10px',
                         backgroundColor: index === selectedIndex ? '#007bff' : 'transparent', // Blue for selected
-                        color: '#ffffff'
+                        color: '#ffffff',
+                        fontSize: '28px',
 
                     } }
                     initial={ { opacity: 0.5 } }

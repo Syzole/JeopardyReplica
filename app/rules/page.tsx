@@ -8,7 +8,6 @@ import Link from 'next/link';
 import io from 'socket.io-client';
 import { hostingIP } from '@/constants';
 
-
 const socket = io(hostingIP); // Adjust to your server's URL
 
 interface Team {
@@ -16,9 +15,7 @@ interface Team {
     points: number;
 }
 
-
 const App: React.FC = () => {
-
     const [ teams, setTeams ] = useState<Team[]>([]);
     const [ teamName, setTeamName ] = useState('');
     const [ hasAdded, setHasAdded ] = useState(false);
@@ -33,6 +30,14 @@ const App: React.FC = () => {
     // Load teams on component mount
     useEffect(() => {
         loadTeams();
+
+        socket.on("teams", () => {
+            loadTeams();
+        });
+
+        return () => {
+            socket.off("teams");
+        }
     }, []);
 
     // Function to add a new team
@@ -47,12 +52,19 @@ const App: React.FC = () => {
             body: JSON.stringify({ name: teamName }),
         });
 
-        if (response.ok) {
+        console.log(response);
+
+        if (response.status !== 400) {
             setTeamName('');
             loadTeams(); // Reload teams after adding
-            socket.emit('teams'); // Notify clients of updated
             setHasAdded(true);
+            socket.emit('teams'); // Notify clients of updated
+            return;
         }
+
+        window.alert('Team name already exists');
+        setHasAdded(false);
+        setTeamName('');
     };
 
     return (
@@ -70,11 +82,15 @@ const App: React.FC = () => {
                         placeholder="Team Name"
                         value={ teamName }
                         onChange={ (e) => setTeamName(e.target.value) }
-                        className={ "mr-4" + (hasAdded ? ' bg-gray-300' : 'bg-cyan-800') }
+                        className={ "mr-4 " }
                     />
-                    <Button onClick={ addTeam }
-                        disabled={ hasAdded }
-                    >Add Team</Button>
+                    <Button
+                        onClick={ addTeam }
+                        disabled={ hasAdded } // Keep the button disabled when `hasAdded` is true
+                        color={ hasAdded ? 'success' : 'primary' }
+                    >
+                        { hasAdded ? 'Team Added!' : 'Add Team' }
+                    </Button>
                 </div>
 
                 <div className="mt-8">
@@ -97,7 +113,7 @@ const App: React.FC = () => {
                 </div>
             </div>
             <div className="text-center mb-8">
-                <p className="text-2xl font-semibold mb-4">Once your done click the buttont to head to the buzzer page</p>
+                <p className="text-2xl font-semibold mb-4">Once you&apos;re done, click the button to head to the buzzer page</p>
                 <Link href="/buzzerPage">
                     <Button>Go to buzzer</Button>
                 </Link>
