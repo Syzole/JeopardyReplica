@@ -74,6 +74,11 @@ This project is licensed under the MIT License.
 
 credit to credit magic the noah for the original questions, me and my friends had alot of fun playing these type.
 
-```
+## Flow
 
-```
+1. The host needs to use 2 devices, one to display the game and the other to control the game.
+2. Each team needs 1 device to buzz in and answer the question.
+3. The host can select questions then read the question, then hit reval question to show the question to the teams.
+4. The teams can buzz in by pressing the buzzer button.
+5. The host can then see the teams and what team buzzed in first, give them the chance to answer, and proceed accordingly.
+6. The host can also use the admin page to control the game, such as changing the score, revealing the answer, and more.
