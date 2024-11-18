@@ -82,3 +82,5 @@ credit to credit magic the noah for the original questions, me and my friends ha
 4. The teams can buzz in by pressing the buzzer button.
 5. The host can then see the teams and what team buzzed in first, give them the chance to answer, and proceed accordingly.
 6. The host can also use the admin page to control the game, such as changing the score, revealing the answer, and more.
+
+If you have any questions, please put them in the issues tab and I will respond as soon as I can.
